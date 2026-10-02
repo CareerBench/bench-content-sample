@@ -18,6 +18,11 @@ Personas and goals are independent: any persona can pursue any goal, so write pe
 ```text
 my-bench-content/                 # must be a git repository
 ├── README.md
+├── pyproject.toml                # the validator's dependencies (PyYAML, jsonschema)
+├── scripts/
+│   └── validate_content.py       # checks the whole repo against the rules below
+├── .github/workflows/
+│   └── validate-content.yml      # runs the validator on every pull request
 ├── personas/
 │   ├── _schemas/
 │   │   └── content/
@@ -96,6 +101,32 @@ Checks worth enforcing in CI beyond the schema:
 - A `published` item never keeps the placeholder.
 - No two items of the same type share an `id`, or a `name` (case-insensitive).
 - Folder names match the slug pattern.
+
+## Validating your content
+
+This repository ships that validator: `scripts/validate_content.py` loads each type's
+`_schemas/content/frontmatter.schema.json` and runs the checks above on every item,
+`_example/` included, then prints every problem in one pass. Run it before you commit:
+
+```bash
+uv run python scripts/validate_content.py .
+# or, without uv:
+pip install pyyaml jsonschema && python scripts/validate_content.py .
+```
+
+It exits 0 when the repo is clean and 1 when it found problems, each one reported against
+its file:
+
+```text
+Content validation found 2 problem(s) in /path/to/my-bench-content:
+
+  - goals/_example/goal.md: published items need a real UUID id; run `uuidgen` and replace the placeholder
+  - personas/my_persona/persona.md: (root): Additional properties are not allowed ('descripton' was unexpected)
+```
+
+`.github/workflows/validate-content.yml` runs the same command on every pull request and
+push to `main`. To allow a new frontmatter key, add it to the schema; the script needs no
+change.
 
 ## Lifecycle of an item
 
@@ -290,4 +321,5 @@ The `_example` persona shows that a short second-person paragraph is also a vali
 - [ ] Published items have a real, unique UUID `id` and a unique `name` within their type.
 - [ ] Personas describe voice and reactions in detail, name no goal, and are entirely fictional.
 - [ ] Goals describe what the user wants and when they'd feel done, written for the persona LLM.
+- [ ] `uv run python scripts/validate_content.py .` passes.
 - [ ] Everything is committed before you load it into the Runner.
