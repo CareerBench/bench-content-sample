@@ -1,0 +1,1 @@
+This folder has no persona.md, so the validator reports missing_main_file.

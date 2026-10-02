@@ -25,3 +25,6 @@ jobs:
 
       - name: Validate content
         run: uv run python scripts/validate_content.py .
+
+      - name: Run the validator's tests
+        run: uv run pytest

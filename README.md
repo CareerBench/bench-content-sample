@@ -21,6 +21,7 @@ my-bench-content/                 # must be a git repository
 ├── pyproject.toml                # the validator's dependencies (PyYAML, jsonschema)
 ├── scripts/
 │   └── validate_content.py       # checks the whole repo against the rules below
+├── tests/                        # the validator's own tests (pytest), one fixture per rule
 ├── .github/workflows/
 │   └── validate-content.yml      # runs the validator on every pull request
 ├── personas/
@@ -127,6 +128,11 @@ Content validation found 2 problem(s) in /path/to/my-bench-content:
 `.github/workflows/validate-content.yml` runs the same command on every pull request and
 push to `main`. To allow a new frontmatter key, add it to the schema; the script needs no
 change.
+
+If you change the validator itself, run its tests with `uv run pytest`. Each test copies the
+real `_schemas/` and `_example/` folders into a temporary repo and overlays one fixture from
+`tests/fixtures/<type>/<case>/` that breaks exactly one rule; one more test checks that the
+content you ship passes.
 
 ## Lifecycle of an item
 
